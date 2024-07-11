@@ -1,0 +1,114 @@
+@if(fieldConfig().controlConfig?.controlType) {
+<div class="field" [id]="controlConfig.inputId">
+  <!-- Label -->
+  <div [ngClass]="fieldConfig()!.hideLabel ? 'no-label' : 'label'">
+    @if(!fieldConfig()!.hideLabel){
+    <label [for]="controlConfig['inputId']"
+      >{{ fieldConfig()!.label }}
+      @if(fieldConfig().label && fieldConfig().controlConfig.isRequired){
+      <span class="error"> *</span>
+      }
+    </label>
+    }
+  </div>
+
+  @switch(fieldConfig().controlConfig.controlType) { @case (controlTypeEnum.Checkbox) { @if(isReadonly() || fieldConfig()!.isReadonly){
+  <div class="readonly">
+    @for(option of fieldConfig()!.controlConfig!.options; track fieldConfig().formControlName){
+    <div class="flex">
+      <div class="readonly-check">
+        @if(formControl.value | checkboxOption : option) {
+        <i class="fa-light fa-check"></i>
+        }
+      </div>
+      @if(fieldConfig()!.controlConfig.showOptionLabel){
+      <label class="readonly-checkbox-label" [for]="option.inputId">{{ option.label }} </label>
+      }
+    </div>
+    }
+  </div>
+  }@else{
+  <lib-checkbox
+    [config]="controlConfig"
+    [formControl]="formControl"
+    (blurred)="onBlurred()"
+    (changed)="onChanged($event)"
+    (focused)="onFocused()"
+  ></lib-checkbox>
+  } } @case (controlTypeEnum.DatePicker) { @if(isReadonly() || fieldConfig()!.isReadonly){
+  <ng-container *ngTemplateOutlet="readOnly; context: { $implicit: formControl.value | date : 'shortDate' : 'UTC' }"></ng-container>
+  }@else{
+  <lib-date-picker
+    [config]="controlConfig"
+    [formControl]="formControl"
+    (blurred)="onBlurred()"
+    (changed)="onChanged($event)"
+    (focused)="onFocused()"
+  ></lib-date-picker>
+  } } @case(controlTypeEnum.Integer){ @if(isReadonly() || fieldConfig()!.isReadonly){
+  <ng-container *ngTemplateOutlet="readOnly; context: { $implicit: formControl.value | number : currencyDecimalConfig }"></ng-container>
+  }@else{
+  <lib-number
+    [config]="controlConfig"
+    [formControl]="formControl"
+    (blurred)="onBlurred()"
+    (keyPressed)="onInput($event)"
+    (focused)="onFocused()"
+  ></lib-number
+  >} } @case(controlTypeEnum.Dropdown){ @if(isReadonly() || fieldConfig()!.isReadonly){
+  <ng-container
+    *ngTemplateOutlet="readOnly; context: { $implicit: formControl.value | dropdownOption : controlConfig['options'] }"
+  ></ng-container>
+  }@else{
+  <lib-select
+    [config]="controlConfig"
+    [formControl]="formControl"
+    (blurred)="onBlurred()"
+    (changed)="onChanged($event)"
+    (focused)="onFocused()"
+  ></lib-select
+  >} } @case(controlTypeEnum.TextArea){ @if(isReadonly() || fieldConfig()!.isReadonly){
+  <ng-container *ngTemplateOutlet="readOnly; context: { $implicit: formControl.value }"></ng-container>
+  }@else{
+  <lib-textarea
+    [config]="controlConfig"
+    [formControl]="formControl"
+    (blurred)="onBlurred()"
+    (changed)="onChanged($event)"
+    (focused)="onFocused()"
+    (keyPressed)="onInput($event)"
+  ></lib-textarea>
+  } } @case(controlTypeEnum.Textbox){ @if(isReadonly() || fieldConfig()!.isReadonly){
+  <ng-container *ngTemplateOutlet="readOnly; context: { $implicit: formControl.value }"></ng-container>
+  } @else {
+  <lib-textbox
+    [config]="controlConfig"
+    [pattern]="controlConfig['pattern']"
+    [formControl]="formControl"
+    (blurred)="onBlurred()"
+    (changed)="onChanged($event)"
+    (focused)="onFocused()"
+    (keyPressed)="onInput($event)"
+  >
+    <!-- (valueChange)="onChanged($event)" -->
+  </lib-textbox>
+  } } }
+
+  <div class="hint">
+    <ng-content select="hint"></ng-content>
+  </div>
+
+  @if(fieldConfig().hint){
+  <div class="hint">
+    {{ fieldConfig().hint }}
+  </div>
+  }
+</div>
+
+<ng-template #readOnly let-value>
+  <div class="p-inputtext" [ngClass]="{ placeholder: !value }">
+    {{ value ?? fieldConfig()!.controlConfig.placeholder }}
+  </div>
+</ng-template>
+
+}

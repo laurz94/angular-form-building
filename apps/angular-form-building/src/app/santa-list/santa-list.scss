@@ -1,0 +1,35 @@
+.page {
+  --nice-color: darkturquoise;
+  --naughty-color: tomato;
+}
+
+.naughty {
+  color: var(--naughty-color);
+}
+.nice {
+  color: var(--nice-color);
+}
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+.button {
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+
+  &.naughty {
+    background-color: var(--naughty-color);
+    border-color: var(--naughty-color);
+    color: white;
+  }
+  &.nice {
+    background-color: var(--nice-color);
+    border-color: var(--nice-color);
+    color: white;
+  }
+}

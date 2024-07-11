@@ -1,0 +1,263 @@
+{
+  "root": true,
+  "extends": ["plugin:prettier/recommended", "plugin:@angular-eslint/recommended"],
+  "plugins": ["@nx", "import", "prettier", "unused-imports", "regex", "no-autofix"],
+  "ignorePatterns": ["**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "rules": {
+        "@nx/enforce-module-boundaries": [
+          "error",
+          {
+            "enforceBuildableLibDependency": true,
+            "allow": [],
+            "depConstraints": [
+              {
+                "sourceTag": "*",
+                "onlyDependOnLibsWithTags": ["*"]
+              }
+            ]
+          }
+        ],
+        "max-len": [
+          "error",
+          {
+            "code": 140,
+            "ignorePattern": "^import . *"
+          }
+        ]
+      }
+    },
+    {
+      "files": ["*.ts", "*.tsx"],
+      "extends": ["plugin:@nx/typescript"],
+      "rules": {
+        "@typescript-eslint/no-extra-semi": "error",
+        "no-extra-semi": "off"
+      }
+    },
+    {
+      "files": ["*.js", "*.jsx"],
+      "extends": ["plugin:@nx/javascript"],
+      "rules": {
+        "@typescript-eslint/no-extra-semi": "error",
+        "no-extra-semi": "off"
+      }
+    },
+    {
+      "files": ["*.spec.ts", "*.spec.tsx", "*.spec.js", "*.spec.jsx"],
+      "env": {
+        "jest": true
+      },
+      "rules": {}
+    },
+    {
+      "files": ["*.html"],
+      "excludedFiles": ["*inline-template-*.component.html"],
+      "extends": ["plugin:prettier/recommended"],
+      "rules": {
+        "prettier/prettier": [
+          "error",
+          {
+            "parser": "angular"
+          }
+        ],
+        "max-len": [
+          "error",
+          {
+            "code": 140
+          }
+        ]
+      }
+    },
+    {
+      "files": ["*inline-template-*.component.html"],
+      "extends": ["plugin:@angular-eslint/recommended", "plugin:@angular-eslint/template/process-inline-templates"],
+      "parser": "@angular-eslint/template-parser",
+      "rules": {
+        "prettier/prettier": "off"
+      }
+    },
+    {
+      "files": ["*.ts"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "ecmaVersion": 2020,
+        "sourceType": "module"
+      },
+      "excludedFiles": ["*inline-template-*.component.html"],
+      "plugins": ["@typescript-eslint"],
+      "extends": [
+        "plugin:@angular-eslint/recommended",
+        "plugin:@angular-eslint/template/process-inline-templates",
+        "plugin:prettier/recommended"
+      ],
+      "rules": {
+        "accessor-pairs": "error",
+        "array-callback-return": "error",
+        "comma-dangle": ["error", "only-multiline"],
+        "default-case": "error",
+        "default-case-last": "error",
+        "default-param-last": ["error"],
+        "dot-location": ["error", "property"],
+        "dot-notation": "off",
+        "no-autofix/dot-notation": "warn",
+        "eol-last": ["error", "always"],
+        "grouped-accessor-pairs": "error",
+        "prettier/prettier": [
+          "warn",
+          {
+            "parser": "typescript"
+          }
+        ],
+        "eqeqeq": ["error", "smart"],
+        "max-len": [
+          "error",
+          {
+            "code": 140,
+            "ignorePattern": "^import . *"
+          }
+        ],
+        "import/order": [
+          "error",
+          {
+            "pathGroups": [
+              {
+                "pattern": "src/**",
+                "group": "internal"
+              }
+            ],
+            "pathGroupsExcludedImportTypes": ["builtin"],
+            "groups": ["external", "internal", "parent", "sibling"],
+            "newlines-between": "always",
+            "alphabetize": {
+              "order": "asc",
+              "caseInsensitive": true
+            }
+          }
+        ],
+        "no-array-constructor": "warn",
+        "no-console": [
+          "error",
+          {
+            "allow": ["warn", "error"]
+          }
+        ],
+        "no-debugger": ["error"],
+        "no-eval": "error",
+        "no-new-object": "error",
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": ["rxjs/internal/*"]
+          }
+        ],
+        "padding-line-between-statements": [
+          "error",
+          {
+            "blankLine": "always",
+            "prev": "*",
+            "next": "return"
+          },
+          {
+            "blankLine": "always",
+            "prev": "directive",
+            "next": "*"
+          },
+          {
+            "blankLine": "any",
+            "prev": "import",
+            "next": "*"
+          }
+        ],
+        "prefer-const": ["warn"],
+        "prefer-template": "error",
+        "quotes": [
+          "error",
+          "single",
+          {
+            "avoidEscape": true,
+            "allowTemplateLiterals": true
+          }
+        ],
+        "regex/invalid": [
+          "error",
+          [
+            {
+              "regex": "(fit\\()|(fdescribe\\()",
+              "message": "Focused Tests are not allowed, please remove the `fit()` or `fdescribe()` from your spec file."
+            },
+            {
+              "regex": "(xit\\()|(xdescribe\\()",
+              "message": "Excluded Tests are not allowed, please remove the `fit()` or `fdescribe()` from your spec file."
+            }
+          ]
+        ],
+        "unused-imports/no-unused-imports-ts": "error",
+        "unused-imports/no-unused-vars-ts": [
+          "warn",
+          {
+            "vars": "all",
+            "varsIgnorePattern": "^_",
+            "args": "after-used",
+            "argsIgnorePattern": "^_"
+          }
+        ],
+        "@angular-eslint/component-selector": [
+          "error",
+          {
+            "type": "element",
+            "prefix": "app",
+            "style": "kebab-case"
+          }
+        ],
+        "@angular-eslint/directive-selector": [
+          "error",
+          {
+            "type": "attribute",
+            "prefix": "app",
+            "style": "camelCase"
+          }
+        ],
+        "@typescript-eslint/ban-types": [
+          "error",
+          {
+            "types": {
+              "{}": false
+            },
+            "extendDefaults": true
+          }
+        ],
+        "@typescript-eslint/no-empty-function": [
+          "error",
+          {
+            "allow": ["arrowFunctions"]
+          }
+        ],
+        "@typescript-eslint/no-use-before-define": [
+          "warn",
+          {
+            "functions": false
+          }
+        ],
+        "@typescript-eslint/naming-convention": [
+          "error",
+          {
+            "selector": "interface",
+            "format": ["PascalCase"]
+          }
+        ],
+        "@typescript-eslint/no-explicit-any": [
+          "warn",
+          {
+            "fixToUnknown": false
+          }
+        ],
+        "no-shadow": "off",
+        "@typescript-eslint/no-shadow": ["error"],
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    }
+  ]
+}
