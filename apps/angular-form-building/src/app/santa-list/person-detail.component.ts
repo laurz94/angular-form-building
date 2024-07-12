@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { ContentComponent, ContentConfiguration, fadeInListAnimation, FieldComponent, capitalizeFirstLetter } from '@libs/components';
+import { ContentComponent, ContentConfiguration, fadeInListAnimation, FieldComponent } from '@libs/components';
 import { Store } from '@ngrx/store';
 
 import { Address } from './models/address';
@@ -14,8 +14,12 @@ import {
   getPersonDetailConfiguration,
   getPersonDetailFormGroup,
 } from './person-detail.configuration';
-import { SantaListActions } from './state/santa-list-actions';
-import { selectAddressByPerson, selectContactByPerson, selectPerson, selectSantaListLoaded } from './state/santa-list-selectors';
+import { AddressActions } from './state/address-store/address.actions';
+import { selectAddressByPerson } from './state/address-store/address.selectors';
+import { ContactsActions } from './state/contacts-store/contacts.actions';
+import { selectContactByPerson } from './state/contacts-store/contacts.selectors';
+import { PeopleActions } from './state/people-store/people.actions';
+import { selectPeopleStatus, selectPerson } from './state/people-store/people.selectors';
 
 @Component({
   selector: 'app-person-detail',
@@ -52,10 +56,6 @@ import { selectAddressByPerson, selectContactByPerson, selectPerson, selectSanta
           layout="two-column"
           (dataChanged)="updateState($event, 'person')"
         ></lib-content>
-        <!-- <div class="grid">
-          <h2>Store Value</h2>
-          <pre>{{ contact() | json }}</pre>
-        </div> -->
         <h3>
           <span>Address</span>
           @if(address()?.hasChimney){
@@ -87,7 +87,7 @@ import { selectAddressByPerson, selectContactByPerson, selectPerson, selectSanta
 export class PersonDetailComponent {
   #store = inject(Store);
 
-  isLoaded = this.#store.selectSignal(selectSantaListLoaded);
+  isLoaded = this.#store.selectSignal(selectPeopleStatus);
   address: Signal<Address | undefined> = this.#store.selectSignal(selectAddressByPerson(+this.route.snapshot.params['id']));
   contact: Signal<Contact | undefined> = this.#store.selectSignal(selectContactByPerson(+this.route.snapshot.params['id']));
   person: Signal<Person | undefined> = this.#store.selectSignal(selectPerson(+this.route.snapshot.params['id']));
@@ -125,6 +125,22 @@ export class PersonDetailComponent {
   }
 
   updateState(value: any, stateProp: string) {
-    this.#store.dispatch((SantaListActions as any)[`update${capitalizeFirstLetter(stateProp)}`]({ [stateProp]: value }));
+    let action: any;
+    switch (stateProp) {
+      case 'address':
+        action = AddressActions.updateAddress;
+        break;
+      case 'contact':
+        action = ContactsActions.updateContacts;
+        break;
+      case 'person':
+        action = PeopleActions.updatePerson;
+        break;
+      default:
+        action = PeopleActions.updatePerson;
+        break;
+    }
+
+    this.#store.dispatch(action({ [stateProp]: value }));
   }
 }

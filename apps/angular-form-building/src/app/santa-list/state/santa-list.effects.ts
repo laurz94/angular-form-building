@@ -5,9 +5,11 @@ import { ROUTER_NAVIGATED, RouterNavigatedAction } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 import { concatMap, filter, map } from 'rxjs';
 
+import { AddressActions } from './address-store/address.actions';
+import { ContactsActions } from './contacts-store/contacts.actions';
 import { getAddresses, getContacts, getPeople } from './data';
-import { SantaListActions } from './santa-list-actions';
-import { selectSantaList } from './santa-list-selectors';
+import { PeopleActions } from './people-store/people.actions';
+import { selectAllPeople } from './people-store/people.selectors';
 
 @Injectable()
 export class SantaListEffects {
@@ -17,30 +19,30 @@ export class SantaListEffects {
   loadData$ = createEffect(() =>
     this.#actions$.pipe(
       ofType<RouterNavigatedAction>(ROUTER_NAVIGATED),
-      concatLatestFrom(() => this.#store.select(selectSantaList)),
+      concatLatestFrom(() => this.#store.select(selectAllPeople)),
       filter(([_action, people]) => !people?.length),
       concatMap(() => {
-        return [SantaListActions.loadAddresses(), SantaListActions.loadContacts(), SantaListActions.loadList()];
+        return [AddressActions.loadAddresses(), ContactsActions.loadContacts(), PeopleActions.loadPeople()];
       })
     )
   );
 
   loadPeople$ = createEffect(() =>
     this.#actions$.pipe(
-      ofType(SantaListActions.loadList),
-      map(() => SantaListActions.loadListSuccess({ list: getPeople() }))
+      ofType(PeopleActions.loadPeople),
+      map(() => PeopleActions.loadPeopleSuccess({ people: getPeople() }))
     )
   );
   loadAddresses$ = createEffect(() =>
     this.#actions$.pipe(
-      ofType(SantaListActions.loadAddresses),
-      map(() => SantaListActions.loadAddressesSuccess({ list: getAddresses() }))
+      ofType(AddressActions.loadAddresses),
+      map(() => AddressActions.loadAddressesSuccess({ addresses: getAddresses() }))
     )
   );
   loadContacts$ = createEffect(() =>
     this.#actions$.pipe(
-      ofType(SantaListActions.loadContacts),
-      map(() => SantaListActions.loadContactsSuccess({ list: getContacts() }))
+      ofType(ContactsActions.loadContacts),
+      map(() => ContactsActions.loadContactsSuccess({ contacts: getContacts() }))
     )
   );
 }

@@ -7,7 +7,8 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { selectSantaList, selectNaughtyList, selectNiceList } from './state/santa-list-selectors';
+import { selectAllAddresses } from './state/address-store/address.selectors';
+import { selectAllPeople, selectNaughtyList, selectNiceList } from './state/people-store/people.selectors';
 
 @Component({
   selector: 'app-santa-list',
@@ -74,7 +75,10 @@ import { selectSantaList, selectNaughtyList, selectNiceList } from './state/sant
 export class SantaListComponent implements AfterViewInit {
   route = inject(ActivatedRoute);
   #store = inject(Store);
-  people = this.#store.selectSignal(selectSantaList);
+  people = this.#store.selectSignal(selectAllPeople);
+
+  addresses = this.#store.selectSignal(selectAllAddresses);
+  a: any = undefined;
 
   dataSource = new MatTableDataSource(this.people());
   columnsToDisplay = ['actions', 'firstName', 'lastName', 'favoriteColor', 'isNaughty'];
@@ -87,13 +91,14 @@ export class SantaListComponent implements AfterViewInit {
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    this.a = this.addresses().values;
   }
 
   filter(isNaughty: boolean) {
-    console.log({ isNaughty });
+    // console.log({ isNaughty });
     const filteredPeople = isNaughty ? this.#store.selectSignal(selectNaughtyList)() : this.#store.selectSignal(selectNiceList)();
 
     this.dataSource.data = filteredPeople ?? [];
-    console.log({ filteredPeople });
+    // console.log({ filteredPeople });
   }
 }
