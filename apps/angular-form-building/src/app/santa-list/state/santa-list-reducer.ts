@@ -1,6 +1,8 @@
-import { LoadingStatus, setStatePropertyErrored, setStatePropertyLoaded, setStatePropertyLoading } from '@libs/domain';
+import { setStatePropertyErrored, setStatePropertyLoaded, setStatePropertyLoading, updateValueById } from '@libs/domain';
 import { createReducer, on } from '@ngrx/store';
 
+import { Address } from '../models/address';
+import { Contact } from '../models/contact';
 import { Person } from '../models/person';
 
 import { SantaListActions } from './santa-list-actions';
@@ -22,11 +24,7 @@ export const santaListReducer = createReducer(
   })),
   on(SantaListActions.updatePerson, (state, { person }) => ({
     ...state,
-    people: {
-      ...state.people,
-      status: LoadingStatus.saved,
-      value: state.people.value!.map((p) => (p.id === person.id ? { ...person } : { ...p })),
-    },
+    people: updateValueById<Person>(person, state.people),
   })),
 
   on(SantaListActions.loadAddresses, (state) => ({
@@ -43,11 +41,7 @@ export const santaListReducer = createReducer(
   })),
   on(SantaListActions.updateAddress, (state, { address }) => ({
     ...state,
-    addresses: {
-      ...state.addresses,
-      status: LoadingStatus.saved,
-      value: state.addresses.value!.map((a) => (a.id === address.id ? { ...address } : { ...a })),
-    },
+    addresses: updateValueById<Address>(address, state.addresses),
   })),
 
   on(SantaListActions.loadContacts, (state) => ({
@@ -64,10 +58,6 @@ export const santaListReducer = createReducer(
   })),
   on(SantaListActions.updateContact, (state, { contact }) => ({
     ...state,
-    contacts: {
-      ...state.contacts,
-      status: LoadingStatus.saved,
-      value: state.contacts.value!.map((c) => (c.id === contact.id ? { ...contact } : { ...c })),
-    },
+    contacts: updateValueById<Contact>(contact, state.contacts),
   }))
 );

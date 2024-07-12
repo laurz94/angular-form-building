@@ -53,3 +53,60 @@ export function setStatePropertySaved<T>(value: T): StateProperty<T> {
     status: LoadingStatus.saved,
   };
 }
+
+/******* Array Functions *******/
+/**
+ * Adds value to array
+ * @param value 
+ * @param stateValue 
+ * @returns 
+ */
+export function addValueById<T>(value: T, stateValue: StateProperty<T[]>): StateProperty<T[]> {
+  return {
+    error: undefined,
+    status: LoadingStatus.saved,
+    value: stateValue.value ? [...stateValue?.value, value] : [value],
+  };
+}
+
+/**
+ * Removes value from array
+ * @param value 
+ * @param stateValue 
+ * @returns 
+ */
+export function deleteValueById<T>(value: T, stateValue: StateProperty<T[]>): StateProperty<T[]> {
+  return {
+    error: undefined,
+    status: LoadingStatus.saved,
+    value: stateValue.value?.filter((x: any) => (x.id !== (value as any).id)),
+  };
+}
+
+/**
+ * Overwrites the value in the array
+ * @param value 
+ * @param stateValue 
+ * @returns 
+ */
+export function setValueById<T>(value: T, stateValue: StateProperty<T[]>): StateProperty<T[]> {
+  return {
+    error: undefined,
+    status: LoadingStatus.saved,
+    value: stateValue.value?.map((x: any) => (x.id === (value as any).id ? { ...value } : { ...x })),
+  };
+}
+
+/**
+ * Patches the value in the array
+ * @param value 
+ * @param stateValue 
+ * @returns 
+ */
+export function updateValueById<T>(value: T, stateValue: StateProperty<T[]>): StateProperty<T[]> {
+  return {
+    error: undefined,
+    status: LoadingStatus.saved,
+    value: stateValue.value?.map((x: any) => (x.id === (value as any).id ? { ...x, ...value } : { ...x })),
+  };
+}

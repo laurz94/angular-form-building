@@ -142,10 +142,10 @@ export function getPersonDetailConfiguration(age: Signal<number | undefined>): C
 export function getPersonDetailFormGroup(person: Person | any, address: Address | any, contact: Contact | any): FormGroup {
   const formGroup = new FormGroup({});
   Object.keys(getPersonDetailConfiguration(signal(undefined))).forEach((field) =>
-    formGroup.addControl(`${field}`, new FormControl(person[field]))
+    formGroup.addControl(`${field}`, new FormControl(person?.[field]))
   );
-  Object.keys(getAddressDetailConfiguration()).forEach((field) => formGroup.addControl(`${field}`, new FormControl(address[field])));
-  Object.keys(getContactDetailConfiguration()).forEach((field) => formGroup.addControl(`${field}`, new FormControl(contact[field])));
+  Object.keys(getAddressDetailConfiguration()).forEach((field) => formGroup.addControl(`${field}`, new FormControl(address?.[field])));
+  Object.keys(getContactDetailConfiguration()).forEach((field) => formGroup.addControl(`${field}`, new FormControl(contact?.[field])));
 
   return formGroup;
 }
