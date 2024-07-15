@@ -1,34 +1,45 @@
-import { LoadingStatus } from '@libs/domain';
+import { LoadingStatus, StateProperty } from '@libs/domain';
 import { createSelector } from '@ngrx/store';
 
 import { AppState } from '../../app.config';
 import { Contact } from '../models/contact';
+import { Person } from '../models/person';
 
 import { santaListFeatureKey, SantaListState } from './santa-list-state';
 
 export const selectListState = (state: AppState) => state[santaListFeatureKey];
 
-export const selectSantaList = createSelector(selectListState, (state: SantaListState) => state.people.value);
-export const selectNiceList = createSelector(selectSantaList, (people) => people?.filter((p) => !p.isNaughty));
-export const selectNaughtyList = createSelector(selectSantaList, (people) => people?.filter((p) => p.isNaughty));
+export const selectStateProperty = (property: string, filter?: (x: any) => boolean) =>
+  createSelector(selectListState, (state: SantaListState) => {
+    const stateProp: StateProperty<any> = { ...(state as any)[property] };
 
-export const selectSantaListLoaded = createSelector(
-  selectListState,
-  (state: SantaListState) => state.people.status === LoadingStatus.loaded || LoadingStatus.saved
-);
+    if (Array.isArray(stateProp.value) && filter) {
+      stateProp.value = stateProp.value.filter(filter);
+    }
 
-export const selectPerson = (id: number) =>
-  createSelector(selectSantaList, (people) => {
-    return people?.find((p) => p.id === id);
+    return stateProp.value;
   });
 
-export const selectAddresses = createSelector(selectListState, (state: SantaListState) => state.addresses.value);
-export const selectAddress = (id: number) => createSelector(selectAddresses, (address) => address?.find((p) => p.id === id));
-export const selectAddressByPerson = (personId: number) =>
-  createSelector(selectAddresses, (addresses) => addresses?.find((p) => p.personId === personId));
+export const selectStatePropertySingleValue = (property: string, find: (x: any) => boolean) =>
+  createSelector(selectListState, (state: SantaListState) => {
+    const stateProp: StateProperty<any> = { ...(state as any)[property] };
+
+    if (Array.isArray(stateProp.value) && find) {
+      stateProp.value = stateProp.value.find(find);
+    }
+
+    return stateProp.value;
+  });
+
+export const selectStatePropertyIsLoaded = (property: string) =>
+  createSelector(selectListState, (state: SantaListState) => {
+    const stateProp: StateProperty<any> = { ...(state as any)[property] };
+
+    return stateProp.status === LoadingStatus.loaded || LoadingStatus.saved;
+  });
 
 export const selectParents = (personId: number) =>
-  createSelector(selectSantaList, (people) => {
+  createSelector(selectStateProperty('people'), (people: Person[]) => {
     const person = people?.find((p) => p.id === personId);
     const mom = people?.find((p) => p.id === person?.motherPersonId);
     const dad = people?.find((p) => p.id === person?.fatherPersonId);

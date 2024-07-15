@@ -1,21 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal, Signal, WritableSignal } from '@angular/core';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ContentComponent, ContentConfiguration, fadeInListAnimation, FieldComponent, capitalizeFirstLetter } from '@libs/components';
 import { Store } from '@ngrx/store';
+import { map } from 'rxjs';
 
 import { Address } from './models/address';
 import { Contact } from './models/contact';
 import { Person } from './models/person';
-import {
-  getAddressDetailConfiguration,
-  getContactDetailConfiguration,
-  getPersonDetailConfiguration,
-  getPersonDetailFormGroup,
-} from './person-detail.configuration';
+import { getAddressDetailConfiguration, getContactDetailConfiguration, getPersonDetailConfiguration } from './person-detail.configuration';
 import { SantaListActions } from './state/santa-list-actions';
-import { selectAddressByPerson, selectContactByPerson, selectPerson, selectSantaListLoaded } from './state/santa-list-selectors';
+import { selectContactByPerson, selectStatePropertyIsLoaded, selectStatePropertySingleValue } from './state/santa-list-selectors';
+import { santaListFeatureKey } from './state/santa-list-state';
 
 @Component({
   selector: 'app-person-detail',
@@ -39,43 +37,50 @@ import { selectAddressByPerson, selectContactByPerson, selectPerson, selectSanta
     <div class="page">
       @if(isLoaded()){
       <div class="person">
-        @if(person() && formGroup.value){
-        <h2 [style]="'color: ' + person()!.favoriteColor">
-          {{ person()!.firstName }} {{ person()!.lastName }}
-          <span class="material-symbols-outlined" [ngClass]="person()!.isNaughty ? 'naughty' : 'nice'">
-            {{ person()!.isNaughty ? 'sentiment_extremely_dissatisfied' : 'sentiment_excited' }}
-          </span>
-        </h2>
+        @if(person()){
+
         <lib-content
-          [data]="person()"
+          [routeId]="routeId()"
+          [stateFeatureKey]="storeFeatureKey"
+          stateProperty="people"
           [configurations]="personConfigs()"
           layout="two-column"
           (dataChanged)="updateState($event, 'person')"
-        ></lib-content>
-        <!-- <div class="grid">
-          <h2>Store Value</h2>
-          <pre>{{ contact() | json }}</pre>
-        </div> -->
-        <h3>
-          <span>Address</span>
-          @if(address()?.hasChimney){
-          <span class="material-symbols-outlined roofing">roofing</span>
-          }
-        </h3>
+        >
+          <h2 ngProjectAs="header" [style]="'color: ' + person()!.favoriteColor">
+            {{ person()!.firstName }} {{ person()!.lastName }}
+            <span class="material-symbols-outlined" [ngClass]="person()!.isNaughty ? 'naughty' : 'nice'">
+              {{ person()!.isNaughty ? 'sentiment_extremely_dissatisfied' : 'sentiment_excited' }}
+            </span>
+          </h2>
+        </lib-content>
+
         <lib-content
-          [data]="address()"
+          [routeId]="routeId()"
+          [stateFeatureKey]="storeFeatureKey"
+          stateProperty="addresses"
           [configurations]="addressConfigs"
           layout="two-column"
           (dataChanged)="updateState($event, 'address')"
-        ></lib-content>
+        >
+          <h3 ngProjectAs="header">
+            <span>Address</span>
+            @if(address()?.hasChimney){
+            <span class="material-symbols-outlined roofing">roofing</span>
+            }
+          </h3>
+        </lib-content>
 
-        <h3>Contact Information</h3>
         <lib-content
-          [data]="contact()"
+          [routeId]="routeId()"
+          [stateFeatureKey]="storeFeatureKey"
+          stateProperty="contacts"
           [configurations]="contactConfigs"
           layout="three-column"
           (dataChanged)="updateState($event, 'contact')"
-        ></lib-content>
+        >
+          <h3 ngProjectAs="header">Contact Information</h3>
+        </lib-content>
         }
       </div>
       } @else {
@@ -86,16 +91,20 @@ import { selectAddressByPerson, selectContactByPerson, selectPerson, selectSanta
 })
 export class PersonDetailComponent {
   #store = inject(Store);
-
-  isLoaded = this.#store.selectSignal(selectSantaListLoaded);
-  address: Signal<Address | undefined> = this.#store.selectSignal(selectAddressByPerson(+this.route.snapshot.params['id']));
+  storeFeatureKey = santaListFeatureKey;
+  routeId = toSignal(this.route.params.pipe(map((p) => +p['id'])));
+  isLoaded = this.#store.selectSignal(selectStatePropertyIsLoaded('people'));
+  address: Signal<Address | undefined> = this.#store.selectSignal(
+    selectStatePropertySingleValue('addresses', (p) => p.id === +this.route.snapshot.params['id'])
+  );
   contact: Signal<Contact | undefined> = this.#store.selectSignal(selectContactByPerson(+this.route.snapshot.params['id']));
-  person: Signal<Person | undefined> = this.#store.selectSignal(selectPerson(+this.route.snapshot.params['id']));
+  person: Signal<Person | undefined> = this.#store.selectSignal(
+    selectStatePropertySingleValue('people', (p) => p.id === +this.route.snapshot.params['id'])
+  );
 
   addressConfigs = getAddressDetailConfiguration();
   contactConfigs = getContactDetailConfiguration();
   personConfigs: WritableSignal<ContentConfiguration>;
-  formGroup: FormGroup;
 
   age = computed(() => {
     if (this.person()) {
@@ -118,9 +127,6 @@ export class PersonDetailComponent {
 
   constructor(public route: ActivatedRoute) {
     this.personConfigs = signal(getPersonDetailConfiguration(this.age));
-
-    this.formGroup = getPersonDetailFormGroup(this.person(), this.address(), this.contact());
-
     effect(() => this.personConfigs.update(() => getPersonDetailConfiguration(this.age)), { allowSignalWrites: true });
   }
 

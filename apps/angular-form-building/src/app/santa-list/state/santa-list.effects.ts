@@ -7,7 +7,7 @@ import { concatMap, filter, map } from 'rxjs';
 
 import { getAddresses, getContacts, getPeople } from './data';
 import { SantaListActions } from './santa-list-actions';
-import { selectSantaList } from './santa-list-selectors';
+import { selectStateProperty } from './santa-list-selectors';
 
 @Injectable()
 export class SantaListEffects {
@@ -17,7 +17,7 @@ export class SantaListEffects {
   loadData$ = createEffect(() =>
     this.#actions$.pipe(
       ofType<RouterNavigatedAction>(ROUTER_NAVIGATED),
-      concatLatestFrom(() => this.#store.select(selectSantaList)),
+      concatLatestFrom(() => this.#store.select(selectStateProperty('people'))),
       filter(([_action, people]) => !people?.length),
       concatMap(() => {
         return [SantaListActions.loadAddresses(), SantaListActions.loadContacts(), SantaListActions.loadList()];
